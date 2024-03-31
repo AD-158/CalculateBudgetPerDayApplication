@@ -138,7 +138,17 @@ fun HomeScreen(
     val showDatePickerDialog = remember { mutableStateOf(false) }
     val newAmount = remember { mutableStateOf(userPreferences.amount.toString()) }
     val newDate = remember { mutableLongStateOf(userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)) }
+    val formattedDate = remember {
+        derivedStateOf {
+            SimpleDateFormat("EE dd MMMM yyyy", Locale(if (userPreferences.language.toString() == "English") "en" else "ru")).format(Date(newDate.longValue))
+        }
+    }
     if (openDialog.value) {
+        newAmount.value = userPreferences.amount.toString()
+        if (newDate.longValue < calendar.timeInMillis) {
+            newDate.longValue =
+                userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
+        }
         AlertDialog(
             onDismissRequest = {  },
             confirmButton = {
@@ -148,6 +158,8 @@ fun HomeScreen(
                         coroutineScope.launch {
                             settingsViewModel.updateAmount(newAmount.value.toDouble())
                             settingsViewModel.updateStartDate(calendar.timeInMillis)
+                            if (newDate.longValue <= calendar.timeInMillis)
+                                newDate.longValue = userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
                             settingsViewModel.updatePeriod(((newDate.longValue - calendar.timeInMillis) / (1000 * 60 * 60 * 24)).toInt())
                         }
                     },
@@ -160,6 +172,7 @@ fun HomeScreen(
                     onClick = {
                         openDialog.value = false
                         newAmount.value = userPreferences.amount.toString()
+                        newDate.longValue = userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
                     }
                 ) {
                     Text(stringResource(id = R.string.nav_drawer_modal_action_cancel_text))
@@ -170,7 +183,7 @@ fun HomeScreen(
                     Row {
                         OutlinedTextField(
                             value = newAmount.value,
-                            onValueChange = { newAmount.value = it},
+                            onValueChange = { coroutineScope.launch { newAmount.value = it }},
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             label = { Text(stringResource(R.string.home_change_budget)) },
                             colors = OutlinedTextFieldDefaults.colors(
@@ -184,12 +197,8 @@ fun HomeScreen(
                     }
                     Row {
                         OutlinedTextField(
-                            value = if (newDate.longValue <= calendar.timeInMillis)
-                                        SimpleDateFormat("EE dd MMMM yyyy", Locale(if (userPreferences.language.toString() == "English") "en" else "ru")).format(Date(userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)))
-                                    else
-                                        SimpleDateFormat("EE dd MMMM yyyy", Locale(if (userPreferences.language.toString() == "English") "en" else "ru")).format(Date(newDate.longValue)),
-                            onValueChange = {
-                            },
+                            value = formattedDate.value,
+                            onValueChange = {},
                             label = { Text(stringResource(R.string.home_period)) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -215,7 +224,6 @@ fun HomeScreen(
         )
     }
     if (showDatePickerDialog.value) {
-        newDate.longValue = userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
         val dateState = rememberDatePickerState(
             newDate.longValue,
             selectableDates = object : SelectableDates {
@@ -234,8 +242,8 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showDatePickerDialog.value = false
                         newDate.longValue = dateState.selectedDateMillis ?: 0L
+                        showDatePickerDialog.value = false
                     },
                     enabled = confirmEnabled.value
                 ) {
@@ -473,7 +481,9 @@ fun HomeScreen(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.None
                         ),
-                        modifier = Modifier.fillMaxWidth().padding(0.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp),
                         singleLine = true,
                         textStyle = MaterialTheme.typography.titleLarge
                     )

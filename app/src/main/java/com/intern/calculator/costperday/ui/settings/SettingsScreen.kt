@@ -515,7 +515,7 @@ private fun DurationDialog(
                     showDurationDialog.value = false
                 }
             ) {
-                Text(stringResource(id = R.string.nav_drawer_modal_action_cancel_text))
+                Text(stringResource(id = R.string.nav_drawer_modal_action_1_approve))
             }
         },
         dismissButton = {
