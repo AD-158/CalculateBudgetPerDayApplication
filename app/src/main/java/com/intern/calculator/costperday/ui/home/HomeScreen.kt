@@ -57,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -72,6 +71,7 @@ import com.intern.calculator.costperday.ui.navigation.NavigationDestination
 import com.intern.calculator.costperday.ui.settings.SettingsViewModel
 import com.intern.calculator.costperday.ui.settings.Theme
 import com.intern.calculator.costperday.ui.settings.UserPreferences
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
@@ -143,6 +143,9 @@ fun HomeScreen(
             SimpleDateFormat("EE dd MMMM yyyy", Locale(if (userPreferences.language.toString() == "English") "en" else "ru")).format(Date(newDate.longValue))
         }
     }
+
+    // Collect item UI state
+    val itemUiState by viewModel.itemUiState.collectAsState()
     if (openDialog.value) {
         newAmount.value = userPreferences.amount.toString()
         if (newDate.longValue < calendar.timeInMillis) {
@@ -155,12 +158,24 @@ fun HomeScreen(
                 TextButton(
                     onClick = {
                         openDialog.value = false
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.IO) {
                             settingsViewModel.updateAmount(newAmount.value.toDouble())
                             settingsViewModel.updateStartDate(calendar.timeInMillis)
                             if (newDate.longValue <= calendar.timeInMillis)
                                 newDate.longValue = userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
                             settingsViewModel.updatePeriod(((newDate.longValue - calendar.timeInMillis) / (1000 * 60 * 60 * 24)).toInt())
+
+                            viewModel.deleteItems(calendar.timeInMillis)
+                            val items = itemUiState.itemList.filter { it.date >= calendar.timeInMillis }.sortedBy { it.id }
+                            for (i in items.indices) {
+                                items[i].id = i + 1
+                                viewModel.deleteItems(calendar.timeInMillis*2)
+                            }
+                            viewModel.resetAutoIncrement("t_item")
+                            for (i in items.indices) {
+                                items[i].id = i + 1
+                                viewModel.createItem(items[i])
+                            }
                         }
                     },
                 ) {

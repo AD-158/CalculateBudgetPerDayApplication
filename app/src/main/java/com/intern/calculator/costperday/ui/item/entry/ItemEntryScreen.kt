@@ -81,7 +81,6 @@ fun ItemEntryScreen(
 ) {
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
-    // Check if the quantity unit list is not empty
     // The undo dialog is opened/closed
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(

@@ -46,4 +46,9 @@ interface ItemRepository {
      * Reset index of a table
      */
     suspend fun resetAutoIncrement(tableName: String?)
+
+    /**
+     * Delete all items with date less than chosen from a table
+     */
+    suspend fun deleteAllRowsBeforeChosenDate(chosenDate: Long)
 }

@@ -31,4 +31,6 @@ class OfflineItemRepository(private val itemDao: ItemDAO) : ItemRepository {
     // Reset the auto-increment value for the given table in the local database
     override suspend fun resetAutoIncrement(tableName: String?) = itemDao.resetAutoIncrement(tableName)
 
+    // Delete all items with date less than chosen from a table
+    override suspend fun deleteAllRowsBeforeChosenDate(chosenDate: Long) = itemDao.deleteAllRowsBeforeChosenDate(chosenDate)
 }

@@ -66,11 +66,6 @@ fun ItemDetails.toItem(): Item = Item(
     date = date
 )
 
-// Extension function to format the price of an item
-fun Item.formatedPrice(): String {
-    return NumberFormat.getCurrencyInstance().format(price)
-}
-
 // Extension function to convert Item to ItemUiState
 fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
     itemDetails = this.toItemDetails(),

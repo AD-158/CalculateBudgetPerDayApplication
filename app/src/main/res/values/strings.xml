@@ -80,4 +80,5 @@
     <string name="home_title_day_3">days</string>
     <string name="home_change_budget">Budget</string>
     <string name="home_period">Period</string>
+    <string name="expenses_delete_unnamed_item_title">"Unnamed item with a price = "</string>
 </resources>

@@ -81,4 +81,5 @@
     <string name="home_title_day_3">дней</string>
     <string name="home_change_budget">Бюджет</string>
     <string name="home_period">Период</string>
+    <string name="expenses_delete_unnamed_item_title">"Безымянный товр с ценой = "</string>
 </resources>

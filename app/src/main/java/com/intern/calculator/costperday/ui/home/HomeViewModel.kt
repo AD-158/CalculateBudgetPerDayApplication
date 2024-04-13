@@ -1,28 +1,20 @@
 package com.intern.calculator.costperday.ui.home
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.intern.calculator.costperday.data.classes.Item
 import com.intern.calculator.costperday.data.repository.online.ItemRepository
-import com.intern.calculator.costperday.ui.expenses.ItemUiState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.withContext
 import java.util.Calendar
-import java.util.Date
 
 class HomeViewModel(
     private val itemRepository: ItemRepository,
 ) : ViewModel() {
-    // MutableStateFlow to hold the UI state
-    private val _itemUiState = MutableStateFlow(ItemUiState())
     // StateFlow for quantity unit UI state
     val itemUiState: StateFlow<ItemUiState> =
         itemRepository.getAllItemsStream().map { ItemUiState(it) }
@@ -40,25 +32,21 @@ class HomeViewModel(
                 initialValue = ItemUiState()
             )
 
-    // Function to get the list of items
-    @Composable
-    fun getItemList(): List<Item> {
-        return itemUiState.collectAsState().value.itemList
-    }
-
-    // Function to get the list of items without today items
-    fun getAllItemsWithoutToday(date: Long): Flow<List<Item>> {
-        return itemRepository.getAllItemsWithoutToday(date)
-    }
-
-    // Function to get the list of today items
-    fun getAllTodayItems(date: Long): Flow<List<Item>> {
-        return itemRepository.getAllTodayItems(date)
-    }
-
     // Function to create a new Item
     suspend fun createItem(Item: Item) {
         itemRepository.insertItem(Item)
+    }
+
+    // Function to Delete all items with date less than chosen from a table
+    suspend fun deleteItems(chosenDate: Long) {
+        itemRepository.deleteAllRowsBeforeChosenDate(chosenDate)
+    }
+
+    // Function to reset auto-increment for a given table
+    suspend fun resetAutoIncrement(tableName: String?) {
+        withContext(Dispatchers.IO) {
+            itemRepository.resetAutoIncrement(tableName)
+        }
     }
 
     fun getTodayDate(): Long {

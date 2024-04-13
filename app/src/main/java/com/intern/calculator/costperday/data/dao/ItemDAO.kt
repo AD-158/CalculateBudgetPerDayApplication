@@ -40,6 +40,10 @@ interface ItemDAO {
     fun getItem(id: Int): Flow<Item>
 
     // Reset the auto-increment value for a given table
-    @Query("DELETE FROM sqlite_sequence WHERE name = :tableName")
+    @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = :tableName")
     fun resetAutoIncrement(tableName: String?)
+
+    // Delete all items with date less than chosen from a table
+    @Query("DELETE FROM t_item WHERE t_item_date < :chosenDate")
+    fun deleteAllRowsBeforeChosenDate(chosenDate: Long)
 }
