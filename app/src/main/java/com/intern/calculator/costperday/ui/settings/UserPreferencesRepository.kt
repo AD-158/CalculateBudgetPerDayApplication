@@ -31,7 +31,9 @@ data class UserPreferences(
     val duration: Long,
     val amount: Double,
     val period: Int,
-    val startDate: Long
+    val startDate: Long,
+    val lastDate: Long,
+    val remainingBudget: Double,
 )
 
 // Enum representing different theme options
@@ -62,6 +64,8 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val AMOUNT_KEY = doublePreferencesKey("amount")
         val PERIOD_KEY = intPreferencesKey("period")
         val START_DATE_KEY = longPreferencesKey("startDate")
+        val LAST_OPEN_APP_DATE_KEY = longPreferencesKey("lastDate")
+        val REMAINING_BUDGET_KEY = doublePreferencesKey("remainingBudget")
     }
 
     // Flow to observe user preferences changes
@@ -126,10 +130,24 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    // Function to update the lastDate preference
+    suspend fun updateLastDate(date: Long) {
+        updatePreferences { preferences ->
+            preferences[PreferencesKeys.LAST_OPEN_APP_DATE_KEY] = date
+        }
+    }
+
     // Function to update preferences in the DataStore
     private suspend fun updatePreferences(update: suspend (MutablePreferences) -> Unit) {
         dataStore.edit { preferences ->
             update(preferences)
+        }
+    }
+
+    // Function to update the amount preference
+    suspend fun updateRemainingBudget(amount: Double) {
+        updatePreferences { preferences ->
+            preferences[PreferencesKeys.REMAINING_BUDGET_KEY] = amount
         }
     }
 
@@ -143,6 +161,8 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val amount = preferences[PreferencesKeys.AMOUNT_KEY] ?: 15453.0
         val period = preferences[PreferencesKeys.PERIOD_KEY] ?: 30
         var startDate = preferences[PreferencesKeys.START_DATE_KEY] ?: 0L
+        var lastDate = preferences[PreferencesKeys.LAST_OPEN_APP_DATE_KEY] ?: 0L
+        var remainingBudget = preferences[PreferencesKeys.REMAINING_BUDGET_KEY] ?: 0.0
         if (startDate == 0L) {
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -166,7 +186,9 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
             duration = duration,
             amount = amount,
             period = period,
-            startDate = startDate
+            startDate = startDate,
+            lastDate = lastDate,
+            remainingBudget = remainingBudget,
         )
     }
 

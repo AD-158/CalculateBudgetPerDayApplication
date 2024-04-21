@@ -32,6 +32,14 @@ class HomeViewModel(
                 initialValue = ItemUiState()
             )
 
+    val itemUiStateWithoutTwoDays: StateFlow<ItemUiState> =
+        itemRepository.getAllItemsWithoutToday(getTodayDate()-1000L*60*60*24).map { ItemUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = ItemUiState()
+            )
+
     // Function to create a new Item
     suspend fun createItem(Item: Item) {
         itemRepository.insertItem(Item)

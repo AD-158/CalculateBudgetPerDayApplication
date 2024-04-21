@@ -96,7 +96,9 @@ fun SettingsScreen(navigateUp: () -> Unit,
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()

@@ -216,7 +216,9 @@ fun ItemInputForm(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     if (showDatePickerDialog.value) {
         val dateState = rememberDatePickerState(
@@ -390,7 +392,9 @@ private fun DeleteConfirmationDialog(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     if (openDialogCustom.value) {
         CustomDialog(

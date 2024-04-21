@@ -105,7 +105,9 @@ fun CostPerDayTheme(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
 
     // Determine color scheme based on user preferences

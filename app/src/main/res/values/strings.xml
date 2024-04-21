@@ -81,4 +81,7 @@
     <string name="home_change_budget">Budget</string>
     <string name="home_period">Period</string>
     <string name="expenses_delete_unnamed_item_title">"Unnamed item with a price = "</string>
+    <string name="homescreen_remaining_money_action_text">Вы хотите перевести оставшиеся %1$s на следующий день или распределить их по оставшемуся сроку?</string>
+    <string name="homescreen_remaining_money_action_cancel">Reschedule the leftovers for today</string>
+    <string name="homescreen_remaining_money_action_ok">Recalculate the budget</string>
 </resources>

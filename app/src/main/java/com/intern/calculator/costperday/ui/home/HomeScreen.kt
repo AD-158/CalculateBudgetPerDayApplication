@@ -112,25 +112,41 @@ fun HomeScreen(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     var diffDateInDays by remember { mutableLongStateOf(0L) }
+    val openRemainingBudgetChoiceDialog = remember { mutableStateOf(false) }
+
+    val spentWithout2d = viewModel.itemUiStateWithoutToday.collectAsState().value.itemList.sumOf { it.price }
+    val spentWithoutTwoDays = viewModel.itemUiStateWithoutTwoDays.collectAsState().value.itemList.sumOf { it.price }
+    val allSpent = viewModel.itemUiState.collectAsState().value.itemList.sumOf { it.price }
+
+    var diffForRemainingBudget by remember { mutableDoubleStateOf(0.0) }
     LaunchedEffect(userPreferences.startDate) {
         diffDateInDays = (calendar.timeInMillis - userPreferences.startDate) / (1000L * 60 * 60 * 24)
     }
-
-    val spentWithout2d = viewModel.itemUiStateWithoutToday.collectAsState().value.itemList.sumOf { it.price }
-    val allSpent = viewModel.itemUiState.collectAsState().value.itemList.sumOf { it.price }
+    LaunchedEffect(userPreferences.lastDate) {
+        if ((userPreferences.lastDate == 0L) && (diffDateInDays < 19000))
+            settingsViewModel.updateLastDate(calendar.timeInMillis)
+        diffForRemainingBudget = (userPreferences.amount-spentWithoutTwoDays - userPreferences.remainingBudget) / (userPreferences.period-diffDateInDays+1) - spentWithout2d + userPreferences.remainingBudget
+        if ((userPreferences.lastDate != calendar.timeInMillis) && (userPreferences.lastDate != 0L) && (diffForRemainingBudget >= 0.0)) {
+            openRemainingBudgetChoiceDialog.value = true
+        }
+    }
 
     var spentToday by remember { mutableDoubleStateOf(0.0) }
     LaunchedEffect(allSpent) {
         spentToday = allSpent - spentWithout2d
     }
     val sumForToday =
-        if ((((userPreferences.amount-spentWithout2d)/(userPreferences.period-diffDateInDays))-spentToday) <= 0.0)
+        if ((((userPreferences.amount-spentWithout2d-userPreferences.remainingBudget) /
+                    (userPreferences.period-diffDateInDays))-spentToday + userPreferences.remainingBudget) <= 0.0)
             0.0
         else
-            (((userPreferences.amount-spentWithout2d)/(userPreferences.period-diffDateInDays))-spentToday)
+            (((userPreferences.amount-spentWithout2d-userPreferences.remainingBudget) /
+                    (userPreferences.period-diffDateInDays))-spentToday + userPreferences.remainingBudget)
     val sumForTomorrow = (userPreferences.amount - allSpent) / (userPreferences.period-diffDateInDays - 1)
     var spentMoney by remember { mutableStateOf("") }
 
@@ -164,6 +180,8 @@ fun HomeScreen(
                             if (newDate.longValue <= calendar.timeInMillis)
                                 newDate.longValue = userPreferences.startDate + (1000L * 60 * 60 * 24 * userPreferences.period)
                             settingsViewModel.updatePeriod(((newDate.longValue - calendar.timeInMillis) / (1000 * 60 * 60 * 24)).toInt())
+                            settingsViewModel.updateLastDate(calendar.timeInMillis)
+                            settingsViewModel.updateRemainingBudget(0.0)
 
                             viewModel.deleteItems(calendar.timeInMillis)
                             val items = itemUiState.itemList.filter { it.date >= calendar.timeInMillis }.sortedBy { it.id }
@@ -233,6 +251,48 @@ fun HomeScreen(
                                 )
                             },
                         )
+                    }
+                }
+            }
+        )
+    }
+    if (openRemainingBudgetChoiceDialog.value) {
+        LaunchedEffect(openRemainingBudgetChoiceDialog.value) {
+            coroutineScope.launch(Dispatchers.IO) {
+                settingsViewModel.updateLastDate(calendar.timeInMillis)
+            }
+        }
+        // ToDo разница в оставшихся деньгах и в тех что должны были остаться
+        AlertDialog(
+            onDismissRequest = {  },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openRemainingBudgetChoiceDialog.value = false
+                        coroutineScope.launch(Dispatchers.IO) {
+                            settingsViewModel.updateRemainingBudget(0.0)
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.homescreen_remaining_money_action_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openRemainingBudgetChoiceDialog.value = false
+                        coroutineScope.launch(Dispatchers.IO) {
+                            settingsViewModel.updateRemainingBudget(diffForRemainingBudget)
+                        }
+                    }
+                ) {
+                    Text(stringResource(id = R.string.homescreen_remaining_money_action_cancel))
+                }
+            },
+            text = {
+                Column {
+                    Row {
+                        Text(stringResource(R.string.homescreen_remaining_money_action_text, diffForRemainingBudget))
                     }
                 }
             }

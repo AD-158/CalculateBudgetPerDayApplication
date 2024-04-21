@@ -82,4 +82,7 @@
     <string name="home_change_budget">Бюджет</string>
     <string name="home_period">Период</string>
     <string name="expenses_delete_unnamed_item_title">"Безымянный товр с ценой = "</string>
+    <string name="homescreen_remaining_money_action_text">Вы хотите перевести оставшиеся %1$s на следующий день или распределить их по оставшемуся сроку?</string>
+    <string name="homescreen_remaining_money_action_cancel">Перенести на сегодня</string>
+    <string name="homescreen_remaining_money_action_ok">Пересчитать бюджет</string>
 </resources>

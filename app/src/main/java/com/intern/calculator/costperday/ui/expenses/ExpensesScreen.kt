@@ -223,7 +223,9 @@ private fun InventoryItem(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     val pattern = SimpleDateFormat("EE dd MMMM yyyy", Locale(if (userPreferences.language.toString() == "English") "en" else "ru"))
     Card(
@@ -305,7 +307,9 @@ private fun DeleteConfirmationDialog(
             4000L,
             15453.0,
             30,
-            0L)
+            0L,
+            0L,
+            0.0)
     )
     if (openDialogCustom.value) {
         CustomDialog(

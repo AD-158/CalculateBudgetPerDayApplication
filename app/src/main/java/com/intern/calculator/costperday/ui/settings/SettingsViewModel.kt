@@ -71,4 +71,14 @@ class SettingsViewModel(
     suspend fun updateStartDate(date: Long) {
         repository.updateStartDate(date)
     }
+
+    // Function to update the lastDate preference
+    suspend fun updateLastDate(date: Long) {
+        repository.updateLastDate(date)
+    }
+
+    // Function to update the amount preference
+    suspend fun updateRemainingBudget(amount: Double) {
+        repository.updateRemainingBudget(amount)
+    }
 }
